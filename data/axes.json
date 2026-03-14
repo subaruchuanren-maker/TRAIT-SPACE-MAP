@@ -9,7 +9,9 @@
       "name_ja": "リスク許容",
       "name_en": "RiskTolerance",
       "negative": "慎重",
-      "positive": "挑戦的"
+      "positive": "挑戦的",
+      "description_ja": "不確実な状況でリスクを取るか、確実性を優先するかを表す軸。",
+      "use_case_ja": "勝負所での仕掛け、危険行動の頻度、撤退判断の傾向分析。"
     },
     {
       "id": "cooperation",
@@ -17,7 +19,9 @@
       "name_ja": "協調志向",
       "name_en": "Cooperation",
       "negative": "単独志向",
-      "positive": "協力志向"
+      "positive": "協力志向",
+      "description_ja": "他者と連携して目的を達成しようとする度合いを表す軸。",
+      "use_case_ja": "チーム行動、支援行動、役割分担の適性評価。"
     },
     {
       "id": "aggression",
@@ -25,7 +29,9 @@
       "name_ja": "攻撃性",
       "name_en": "Aggression",
       "negative": "穏健",
-      "positive": "攻撃的"
+      "positive": "攻撃的",
+      "description_ja": "対立局面でどれだけ強く前に出るかを示す軸。",
+      "use_case_ja": "圧力の強さ、対人衝突の起こしやすさ、先制行動の判定。"
     },
     {
       "id": "persistence",
@@ -33,7 +39,9 @@
       "name_ja": "持続性",
       "name_en": "Persistence",
       "negative": "柔軟",
-      "positive": "固執"
+      "positive": "固執",
+      "description_ja": "一度決めた方針を維持するか、途中で切り替えるかを表す軸。",
+      "use_case_ja": "長期計画の継続、粘り強さ、方針転換タイミングの分析。"
     },
     {
       "id": "adaptability",
@@ -41,7 +49,9 @@
       "name_ja": "適応性",
       "name_en": "Adaptability",
       "negative": "変化に弱い",
-      "positive": "柔軟"
+      "positive": "柔軟",
+      "description_ja": "環境変化に対して行動をどれだけ素早く合わせられるかを示す軸。",
+      "use_case_ja": "状況変化への追従、戦術変更後の収束速度、再配置適性。"
     },
     {
       "id": "self_reliance",
@@ -49,7 +59,9 @@
       "name_ja": "自立性",
       "name_en": "SelfReliance",
       "negative": "依存的",
-      "positive": "独立的"
+      "positive": "独立的",
+      "description_ja": "他者判断への依存度と、自己判断で動く傾向の差を表す軸。",
+      "use_case_ja": "単独行動適性、指示待ち傾向、自律エージェント設計。"
     },
     {
       "id": "trust",
@@ -57,7 +69,9 @@
       "name_ja": "信頼",
       "name_en": "Trust",
       "negative": "疑い深い",
-      "positive": "信頼的"
+      "positive": "信頼的",
+      "description_ja": "他者の意図や情報をどの程度信じるかを示す軸。",
+      "use_case_ja": "協力成立率、情報共有の受容、裏切り耐性の設計。"
     },
     {
       "id": "control",
@@ -65,7 +79,9 @@
       "name_ja": "主導性",
       "name_en": "ControlSeeking",
       "negative": "追従",
-      "positive": "支配"
+      "positive": "支配",
+      "description_ja": "場面で主導権を握りたいか、追従を選ぶかを表す軸。",
+      "use_case_ja": "リーダー選出、意思決定権の配分、統率と反発の分析。"
     },
     {
       "id": "emotion",
@@ -73,7 +89,9 @@
       "name_ja": "感情反応",
       "name_en": "EmotionalReactivity",
       "negative": "冷静",
-      "positive": "感情的"
+      "positive": "感情的",
+      "description_ja": "刺激に対する感情の振れ幅と反応速度を表す軸。",
+      "use_case_ja": "短期的な判断ブレ、衝動行動、安定運用の設計。"
     },
     {
       "id": "exploration",
@@ -81,7 +99,9 @@
       "name_ja": "探求",
       "name_en": "Exploration",
       "negative": "保守的",
-      "positive": "探索的"
+      "positive": "探索的",
+      "description_ja": "未知要素を試す傾向と、既知手法を維持する傾向の差を表す軸。",
+      "use_case_ja": "新戦略採用、未知領域探索、安定行動とのトレードオフ調整。"
     }
   ]
 }

@@ -18,8 +18,76 @@ body {
   padding: 24px;
 }
 
+.workspaceLayout {
+  display: grid;
+  grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.leftPane {
+  position: sticky;
+  top: 12px;
+}
+
+.rightPane {
+  min-width: 0;
+}
+
+.rightPaneBody {
+  max-height: calc(100vh - 170px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
 h1 {
   margin: 0 0 16px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.sectionHeader h2 {
+  margin: 0;
+}
+
+.sectionHeaderRight {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.presetPicker {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.tabSwitcher {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tabButton {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #111827;
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.tabButton.active {
+  border-color: #1d4ed8;
+  background: #dbeafe;
+  color: #1e3a8a;
 }
 
 .card {
@@ -48,6 +116,87 @@ select {
   padding: 8px;
 }
 
+input[type="text"] {
+  min-width: 220px;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+}
+
+.plainValue {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  color: #374151;
+}
+
+.helperText {
+  margin: 0 0 8px;
+  color: #4b5563;
+  font-size: 13px;
+}
+
+.axisMeta {
+  font-size: 13px;
+  color: #374151;
+  margin-bottom: 10px;
+}
+
+.axisPickerGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 8px;
+}
+
+.axisPickerItem {
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  column-gap: 8px;
+  row-gap: 2px;
+  align-items: center;
+  background: #ffffff;
+}
+
+.axisPickerItem input {
+  margin: 0;
+  grid-row: span 2;
+}
+
+.axisPickerItem.selected {
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.axisDescription {
+  grid-column: 2;
+  color: #4b5563;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.axisActionRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.minorButton {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #111827;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.minorButton:hover {
+  background: #f9fafb;
+}
+
 .plot {
   width: 100%;
   height: auto;
@@ -66,8 +215,45 @@ td {
   text-align: left;
 }
 
+.spaceTableWrap {
+  overflow-x: auto;
+}
+
+.spaceTable {
+  min-width: 1200px;
+}
+
+.cellSub {
+  color: #6b7280;
+  font-size: 12px;
+}
+
 @media (max-width: 720px) {
   .page {
     padding: 12px;
+  }
+
+  .workspaceLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .leftPane {
+    position: static;
+  }
+
+  .rightPaneBody {
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  .sectionHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .sectionHeaderRight {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
