@@ -13,7 +13,7 @@ body {
 }
 
 .page {
-  max-width: 1600px;
+  max-width: 1440px;
   margin: 0 auto;
   padding: 24px;
 }
@@ -35,8 +35,8 @@ body {
 }
 
 .rightPaneBody {
-  max-height: calc(100vh - 170px);
-  overflow-y: auto;
+  max-height: none;
+  overflow: visible;
   padding-right: 4px;
 }
 

@@ -1,6 +1,6 @@
 {
-  "vector_version": "0.2",
-  "dimension_count": 18,
+  "vector_version": "0.3",
+  "dimension_count": 20,
   "value_range": [-1.0, 1.0],
   "axes": [
     {
@@ -36,12 +36,12 @@
     {
       "id": "persistence",
       "index": 3,
-      "name_ja": "持続性",
+      "name_ja": "粘り強さ",
       "name_en": "Persistence",
-      "negative": "柔軟",
-      "positive": "固執",
-      "description_ja": "一度決めた方針を維持するか、途中で切り替えるかを表す軸。",
-      "use_case_ja": "長期計画の継続、粘り強さ、方針転換タイミングの分析。"
+      "negative": "諦めやすい",
+      "positive": "粘り強い",
+      "description_ja": "困難や失敗に直面したとき、どれだけ継続して踏ん張れるかを表す軸。",
+      "use_case_ja": "長期目標の完遂率、逆境時の再挑戦、育成シミュでの努力継続性の推定。"
     },
     {
       "id": "adaptability",
@@ -96,12 +96,12 @@
     {
       "id": "exploration",
       "index": 9,
-      "name_ja": "探求",
+      "name_ja": "探索性",
       "name_en": "Exploration",
       "negative": "保守的",
       "positive": "探索的",
-      "description_ja": "未知要素を試す傾向と、既知手法を維持する傾向の差を表す軸。",
-      "use_case_ja": "新戦略採用、未知領域探索、安定行動とのトレードオフ調整。探険心・開放性・冒険心・知的好奇心を包含。"
+      "description_ja": "未知領域へ実際に足を踏み入れる行動傾向を表す軸。",
+      "use_case_ja": "マップ探索、未検証ルート採用、未知エリアへの進出。内的動機としての好奇心とは分離。"
     },
     {
       "id": "morality",
@@ -148,10 +148,10 @@
       "index": 14,
       "name_ja": "狡猾さ",
       "name_en": "Cunning",
-      "negative": "正直",
+      "negative": "愚直",
       "positive": "策略的",
-      "description_ja": "目的達成のために迂回・策略・欺瞞をどれだけ使うかを示す軸。",
-      "use_case_ja": "SLGでの奇策・陽動、クライムでの策略、交渉での罠設置。"
+      "description_ja": "目的達成のために布石・駆け引き・読み合いをどれだけ使うかを示す軸。",
+      "use_case_ja": "SLGでの奇策・陽動、クライムでの計略、交渉での誘導設計。嘘そのものの頻度は虚言性で扱う。"
     },
     {
       "id": "honor",
@@ -178,10 +178,30 @@
       "index": 17,
       "name_ja": "虚言性",
       "name_en": "Deception",
-      "negative": "正直",
-      "positive": "欺瞞的",
-      "description_ja": "嘘・偽装・情報操作を手段として使う頻度を示す軸。",
-      "use_case_ja": "クライム/ノワールでの情報戦、外交での欺瞞、裏切りの予兆。信頼度（信じる側）の対軸として機能。"
+      "negative": "率直",
+      "positive": "虚言的",
+      "description_ja": "発言や自己提示に嘘・誇張・偽装をどれだけ混ぜるかを示す軸。",
+      "use_case_ja": "情報戦でのブラフ、証言の信頼性、裏切り兆候の検出。策略性（狡猾さ）とは分離して扱う。"
+    },
+    {
+      "id": "discipline",
+      "index": 18,
+      "name_ja": "規律性",
+      "name_en": "Discipline",
+      "negative": "衝動的",
+      "positive": "規律的",
+      "description_ja": "ルール・手順・自己統制をどれだけ維持できるかを表す軸。",
+      "use_case_ja": "隊列維持、指示遵守、連戦時の自己管理、スポーツ育成での基礎練反復。"
+    },
+    {
+      "id": "curiosity",
+      "index": 19,
+      "name_ja": "好奇心",
+      "name_en": "Curiosity",
+      "negative": "無関心",
+      "positive": "好奇心旺盛",
+      "description_ja": "新しい知識や現象に対する内的な興味の強さを表す軸。",
+      "use_case_ja": "未確認情報への接近、学習行動、会話イベントでの質問傾向。行動としての探索性とは分離。"
     }
   ]
 }

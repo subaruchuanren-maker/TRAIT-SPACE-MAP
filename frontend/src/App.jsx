@@ -19,8 +19,8 @@ const AXIS_PRESETS = [
       "risk_tolerance",
       "aggression",
       "persistence",
+      "discipline",
       "control",
-      "cooperation",
       "adaptability",
       "self_reliance",
       "cunning",
@@ -33,6 +33,7 @@ const AXIS_PRESETS = [
     name: "RPG/ファンタジー",
     axisIds: [
       "exploration",
+      "curiosity",
       "morality",
       "cooperation",
       "trust",
@@ -40,7 +41,6 @@ const AXIS_PRESETS = [
       "selfishness",
       "empathy",
       "optimism",
-      "self_reliance",
       "risk_tolerance",
     ],
   },
@@ -50,10 +50,10 @@ const AXIS_PRESETS = [
     axisIds: [
       "aggression",
       "persistence",
+      "discipline",
       "emotion",
       "burst",
       "adaptability",
-      "control",
       "cooperation",
       "self_reliance",
       "optimism",
@@ -98,6 +98,7 @@ const AXIS_PRESETS = [
     axisIds: [
       "cunning",
       "deception",
+      "discipline",
       "trust",
       "selfishness",
       "morality",
@@ -105,10 +106,42 @@ const AXIS_PRESETS = [
       "self_reliance",
       "emotion",
       "honor",
-      "cooperation",
     ],
   },
 ];
+
+const TRAIT_PARAPHRASE_OVERRIDES = {
+  humble: "控え目・謙虚 / 謙虚 / 低姿勢 / 腰が低い",
+  brave: "勇敢 / 大胆 / 雄々しい",
+  cautious: "慎重 / 用心深い / 注意深い",
+  calm: "温厚 / 穏やか / おおらか",
+  responsible: "勤勉 / 努力家 / 真面目 / 職人気質",
+  explorer: "好奇心旺盛 / 探究心",
+  rational: "理性的 / 論理的 / 合理的 / 客観的",
+  logical: "理性的 / 論理的 / 合理的 / 客観的",
+  reasonable: "理性的 / 論理的 / 合理的 / 客観的",
+  compassionate: "慈悲深い / 博愛 / 親切 / 優しい / 利他的 / 献身的",
+  philanthropic: "慈悲深い / 博愛 / 親切 / 優しい / 利他的 / 献身的",
+  kind: "慈悲深い / 博愛 / 親切 / 優しい / 利他的 / 献身的",
+  patient: "忍耐強い / 我慢強い / 継続力がある / 初志貫徹 / 諦めない",
+  sociable: "外向的 / 社交的 / 人懐っこい",
+  introverted: "内向的 / 内気 / 引っ込み思案",
+  competitive: "気が強い / 勝気 / 負けず嫌い",
+  emotional: "感情的 / 気分屋 / 気性が激しい",
+  moody: "感情的 / 気分屋 / 気性が激しい",
+  short_tempered: "感情的 / 気分屋 / 気性が激しい",
+  optimistic: "楽観的 / ポジティブ / 前向き / 楽天的",
+  pessimistic: "悲観的 / ネガティブ",
+  planned: "計画的 / 計画性がある",
+  unplanned: "無計画 / 計画性がない",
+  stubborn: "頑固 / こだわりが強い / 固執系",
+  rigid: "頑固 / こだわりが強い / 固執系",
+  flexible: "柔軟 / 適応系",
+  honest: "正直者 / 正直 / 嘘がつけない",
+  liar: "嘘つき / 虚言癖",
+  self_conscious: "自意識過剰 / 見栄っ張り / 気取ってる / プライドが高い",
+  insecure: "自信喪失 / 弱気 / 気が弱い",
+};
 
 function mapToCanvas(value, minPx, maxPx) {
   const normalized = (value + 1) / 2;
@@ -152,7 +185,7 @@ export default function App() {
 
   const [labelDist, setLabelDist] = useState(72);
   const [selectedAxisIds, setSelectedAxisIds] = useState([]);
-  const [selectedPresetId, setSelectedPresetId] = useState("strategy_sim");
+  const [selectedPresetId, setSelectedPresetId] = useState("strategy_slg");
   const [axisEditorOpen, setAxisEditorOpen] = useState(false);
 
   useEffect(() => {
@@ -268,7 +301,13 @@ export default function App() {
     });
   }, [traits, traitSearch]);
   const traitParaphraseMap = useMemo(
-    () => Object.fromEntries(traits.map((trait) => [trait.trait_id, summarizeTrait(trait, selectedAxes)])),
+    () =>
+      Object.fromEntries(
+        traits.map((trait) => [
+          trait.trait_id,
+          TRAIT_PARAPHRASE_OVERRIDES[trait.trait_id] || summarizeTrait(trait, selectedAxes),
+        ]),
+      ),
     [traits, selectedAxes],
   );
   const compareRowsInSelectedAxes = useMemo(
@@ -311,7 +350,7 @@ export default function App() {
   }
 
   function resetAxisSelection() {
-    applyPreset("strategy_sim");
+    applyPreset("strategy_slg");
   }
 
   function clearAxisSelection() {
