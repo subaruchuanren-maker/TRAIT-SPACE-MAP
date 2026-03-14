@@ -14,6 +14,7 @@ DATA_DIR = ROOT_DIR / "data"
 AXES_PATH = DATA_DIR / "axes.json"
 TRAITS_PATH = DATA_DIR / "traits.csv"
 PROFILES_PATH = DATA_DIR / "profiles.json"
+TRAIT_ALIASES_PATH = DATA_DIR / "trait_aliases.json"
 
 
 class CompareRequest(BaseModel):
@@ -57,6 +58,35 @@ def load_profiles() -> dict[str, dict[str, Any]]:
     with PROFILES_PATH.open("r", encoding="utf-8") as file:
         data = json.load(file)
     return {profile["id"]: profile for profile in data["profiles"]}
+
+
+def load_trait_aliases_doc() -> dict[str, Any]:
+    if not TRAIT_ALIASES_PATH.exists():
+        return {
+            "version": "1.0",
+            "format": "aliases[trait_id] = [代表語, 言い換え1, ...]",
+            "aliases": {},
+        }
+
+    with TRAIT_ALIASES_PATH.open("r", encoding="utf-8-sig") as file:
+        data = json.load(file)
+
+    if not isinstance(data, dict):
+        return {
+            "version": "1.0",
+            "format": "aliases[trait_id] = [代表語, 言い換え1, ...]",
+            "aliases": {},
+        }
+
+    aliases = data.get("aliases", {})
+    if not isinstance(aliases, dict):
+        aliases = {}
+
+    return {
+        "version": data.get("version", "1.0"),
+        "format": data.get("format", "aliases[trait_id] = [代表語, 言い換え1, ...]"),
+        "aliases": aliases,
+    }
 
 
 def compare_trait_vectors(trait_a: str, trait_b: str) -> dict[str, Any]:
@@ -163,6 +193,11 @@ def traits() -> dict[str, Any]:
 @app.get("/profiles")
 def profiles() -> dict[str, Any]:
     return {"profiles": list(load_profiles().values())}
+
+
+@app.get("/trait-aliases")
+def trait_aliases() -> dict[str, Any]:
+    return load_trait_aliases_doc()
 
 
 @app.post("/compare")

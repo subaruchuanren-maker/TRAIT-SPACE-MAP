@@ -124,6 +124,13 @@ input[type="text"] {
   border-radius: 8px;
 }
 
+input[type="number"] {
+  min-width: 120px;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+}
+
 .plainValue {
   min-height: 38px;
   display: flex;
@@ -224,6 +231,68 @@ td {
   padding: 12px 4px;
 }
 
+.recommendStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #374151;
+}
+
+.recommendStats > div {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.recommendTable {
+  margin-bottom: 8px;
+}
+
+.compareMain {
+  min-width: 0;
+}
+
+.compareGuide {
+  position: sticky;
+  top: 12px;
+}
+
+.compareGuide h3 {
+  margin: 0 0 10px;
+}
+
+.guideBlock {
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.guideBlock h4 {
+  margin: 0 0 6px;
+  font-size: 13px;
+}
+
+.guideBlock p {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.4;
+}
+
+.guideBlock p:last-child {
+  margin-bottom: 0;
+}
+
+.guideNote {
+  font-size: 12px;
+  color: #6b7280;
+}
+
 .spaceTableWrap {
   overflow-x: auto;
 }
@@ -254,6 +323,10 @@ td {
     max-height: none;
     overflow: visible;
     padding-right: 0;
+  }
+
+  .compareGuide {
+    position: static;
   }
 
   .sectionHeader {

@@ -143,6 +143,35 @@ const TRAIT_PARAPHRASE_OVERRIDES = {
   insecure: "自信喪失 / 弱気 / 気が弱い",
 };
 
+const COMPOSITION_MODES = {
+  balanced: { label: "中庸重視", alpha: 1.0, beta: 1.2 },
+  diverse: { label: "多様性重視", alpha: 1.4, beta: 0.8 },
+  conflict: { label: "対立強め", alpha: 1.8, beta: 0.45 },
+};
+
+const AXIS_PARAPHRASE_LABELS = {
+  risk_tolerance: { positive: "大胆", negative: "慎重" },
+  cooperation: { positive: "協力的", negative: "単独志向" },
+  aggression: { positive: "攻め気質", negative: "穏健" },
+  persistence: { positive: "粘り強い", negative: "諦めが早い" },
+  adaptability: { positive: "柔軟", negative: "変化に弱い" },
+  self_reliance: { positive: "独立心がある", negative: "依存傾向" },
+  trust: { positive: "人を信じやすい", negative: "疑い深い" },
+  control: { positive: "主導的", negative: "追従的" },
+  emotion: { positive: "感情表現が強い", negative: "冷静" },
+  exploration: { positive: "探索的", negative: "保守的" },
+  morality: { positive: "倫理重視", negative: "目的優先" },
+  empathy: { positive: "共感的", negative: "ドライ" },
+  optimism: { positive: "楽観的", negative: "悲観的" },
+  selfishness: { positive: "自己優先", negative: "利他的" },
+  cunning: { positive: "策略的", negative: "愚直" },
+  honor: { positive: "名誉を重んじる", negative: "評価に無頓着" },
+  burst: { positive: "瞬発型", negative: "安定型" },
+  deception: { positive: "虚言傾向", negative: "率直" },
+  discipline: { positive: "規律的", negative: "衝動的" },
+  curiosity: { positive: "好奇心旺盛", negative: "無関心" },
+};
+
 function mapToCanvas(value, minPx, maxPx) {
   const normalized = (value + 1) / 2;
   return minPx + normalized * (maxPx - minPx);
@@ -154,23 +183,42 @@ function summarizeTrait(trait, axes) {
   }
 
   const topAxes = axes
-    .map((axis) => ({ axis, value: Number(trait.vector[axis.id] ?? 0) }))
+    .map((axis) => ({ axis, value: Number(trait.vector[axis.id] ?? 0), abs: Math.abs(Number(trait.vector[axis.id] ?? 0)) }))
     .sort((a, b) => Math.abs(b.value) - Math.abs(a.value))
     .slice(0, 3);
 
-  const phrase = topAxes.map(({ axis, value }) => {
-    const abs = Math.abs(value);
-    const degree = abs >= 0.75 ? "かなり" : abs >= 0.4 ? "やや" : "少し";
-    const side = value >= 0 ? axis.positive : axis.negative;
-    return `${axis.name_ja}が${degree}${side}`;
-  });
+  if (topAxes[0]?.abs < 0.28) {
+    return "バランス型 / 目立った偏りは少ない";
+  }
 
-  return phrase.join(" / ");
+  const toPhrase = ({ axis, value, abs }) => {
+    const degree = abs >= 0.78 ? "かなり" : abs >= 0.5 ? "やや" : "少し";
+    const labels = AXIS_PARAPHRASE_LABELS[axis.id];
+    const base = labels
+      ? value >= 0
+        ? labels.positive
+        : labels.negative
+      : value >= 0
+        ? axis.positive
+        : axis.negative;
+    return `${degree}${base}`;
+  };
+
+  const phrase = topAxes.map(toPhrase);
+
+  if (phrase.length === 1) {
+    return `${phrase[0]}タイプ`;
+  }
+  if (phrase.length === 2) {
+    return `${phrase[0]}で、${phrase[1]}タイプ`;
+  }
+  return `${phrase[0]}で、${phrase[1]}。${phrase[2]}タイプ`;
 }
 
 export default function App() {
   const [axes, setAxes] = useState([]);
   const [traits, setTraits] = useState([]);
+  const [traitAliases, setTraitAliases] = useState({});
   const [activeView, setActiveView] = useState("map");
 
   const [xAxis, setXAxis] = useState("risk_tolerance");
@@ -183,24 +231,28 @@ export default function App() {
 
   const [traitSearch, setTraitSearch] = useState("");
 
-  const [labelDist, setLabelDist] = useState(72);
   const [selectedAxisIds, setSelectedAxisIds] = useState([]);
   const [selectedPresetId, setSelectedPresetId] = useState("strategy_slg");
   const [axisEditorOpen, setAxisEditorOpen] = useState(false);
+  const [compositionSize, setCompositionSize] = useState(12);
+  const [compositionMode, setCompositionMode] = useState("balanced");
 
   useEffect(() => {
     async function loadInitial() {
-      const [axesRes, traitsRes] = await Promise.all([
+      const [axesRes, traitsRes, aliasesRes] = await Promise.all([
         fetch(`${API_BASE}/axes`),
         fetch(`${API_BASE}/traits`),
+        fetch(`${API_BASE}/trait-aliases`),
       ]);
 
       const axesData = await axesRes.json();
       const traitsData = await traitsRes.json();
+      const aliasesData = aliasesRes.ok ? await aliasesRes.json() : { aliases: {} };
 
       setAxes(axesData.axes);
       setSelectedAxisIds(axesData.axes.slice(0, 10).map((axis) => axis.id));
       setTraits(traitsData.traits);
+      setTraitAliases(aliasesData.aliases || {});
     }
 
     loadInitial().catch((error) => {
@@ -267,26 +319,6 @@ export default function App() {
     }
   }, [axisOptions, xAxis, yAxis]);
 
-  // 近すぎるラベルを間引く（ドットは全件表示、ラベルのみフィルタ）
-  const visibleLabelIds = useMemo(() => {
-    const minDistance = 120 - labelDist;
-    const placed = [];
-    const visible = new Set();
-    for (const point of scatter) {
-      const cx = ((point.x + 1) / 2) * 560 + 40;
-      const cy = ((-point.y + 1) / 2) * 360 + 20;
-      const tooClose = placed.some((p) => Math.hypot(p.cx - cx, p.cy - cy) < minDistance);
-      if (!tooClose) {
-        placed.push({ cx, cy });
-        visible.add(point.trait_id);
-      }
-    }
-    return visible;
-  }, [scatter, labelDist]);
-  const visibleScatter = useMemo(
-    () => scatter.filter((point) => visibleLabelIds.has(point.trait_id)),
-    [scatter, visibleLabelIds],
-  );
   const filteredTraits = useMemo(() => {
     const query = traitSearch.trim().toLowerCase();
     if (!query) {
@@ -303,12 +335,23 @@ export default function App() {
   const traitParaphraseMap = useMemo(
     () =>
       Object.fromEntries(
-        traits.map((trait) => [
-          trait.trait_id,
-          TRAIT_PARAPHRASE_OVERRIDES[trait.trait_id] || summarizeTrait(trait, selectedAxes),
-        ]),
+        traits.map((trait) => {
+          const manualAliases =
+            traitAliases[trait.name_ja] ||
+            traitAliases[trait.trait_id] ||
+            traitAliases[trait.name_en];
+          const manualPhrase =
+            Array.isArray(manualAliases) && manualAliases.length > 0
+              ? manualAliases.filter((item) => typeof item === "string" && item.trim()).join(" / ")
+              : "";
+
+          return [
+            trait.trait_id,
+            manualPhrase || TRAIT_PARAPHRASE_OVERRIDES[trait.trait_id] || summarizeTrait(trait, selectedAxes),
+          ];
+        }),
       ),
-    [traits, selectedAxes],
+    [traits, selectedAxes, traitAliases],
   );
   const compareRowsInSelectedAxes = useMemo(
     () => compareRows.filter((row) => selectedAxisSet.has(row.axis)),
@@ -317,6 +360,116 @@ export default function App() {
   const selectedAxisSummary = useMemo(
     () => selectedAxes.map((axis) => axis.name_ja).join(" / "),
     [selectedAxes],
+  );
+  const compositionPlan = useMemo(() => {
+    if (selectedAxes.length === 0 || traits.length === 0) {
+      return null;
+    }
+
+    const axisIds = selectedAxes.map((axis) => axis.id);
+    const axisMap = Object.fromEntries(selectedAxes.map((axis) => [axis.id, axis]));
+    const mode = COMPOSITION_MODES[compositionMode] || COMPOSITION_MODES.balanced;
+    const pickCount = Math.max(2, Math.min(Number(compositionSize) || 2, traits.length));
+    const emptyVector = Array(axisIds.length).fill(0);
+
+    const vectorDistance = (a, b) =>
+      Math.sqrt(a.reduce((sum, value, index) => sum + (value - b[index]) ** 2, 0) / Math.max(1, a.length));
+    const vectorNorm = (vector) =>
+      Math.sqrt(vector.reduce((sum, value) => sum + value ** 2, 0) / Math.max(1, vector.length));
+
+    const candidates = traits.map((trait) => ({
+      trait,
+      vector: axisIds.map((axisId) => Number(trait.vector?.[axisId] ?? 0)),
+    }));
+
+    const selected = [];
+    const remaining = [...candidates];
+    let meanVector = [...emptyVector];
+
+    while (selected.length < pickCount && remaining.length > 0) {
+      let bestIndex = 0;
+      let bestScore = Number.NEGATIVE_INFINITY;
+
+      for (let index = 0; index < remaining.length; index += 1) {
+        const candidate = remaining[index];
+        const diversity =
+          selected.length === 0
+            ? vectorNorm(candidate.vector)
+            : Math.min(...selected.map((item) => vectorDistance(candidate.vector, item.vector)));
+
+        const nextMean = meanVector.map(
+          (value, axisIndex) =>
+            (value * selected.length + candidate.vector[axisIndex]) / (selected.length + 1),
+        );
+        const centerPenalty = vectorNorm(nextMean);
+        const score = mode.alpha * diversity - mode.beta * centerPenalty;
+
+        if (score > bestScore) {
+          bestScore = score;
+          bestIndex = index;
+        }
+      }
+
+      const picked = remaining.splice(bestIndex, 1)[0];
+      selected.push(picked);
+      meanVector = meanVector.map(
+        (value, axisIndex) => (value * (selected.length - 1) + picked.vector[axisIndex]) / selected.length,
+      );
+    }
+
+    const minDistances = selected.map((item, index) => {
+      const others = selected.filter((_, otherIndex) => otherIndex !== index);
+      if (others.length === 0) {
+        return 0;
+      }
+      return Math.min(...others.map((other) => vectorDistance(item.vector, other.vector)));
+    });
+
+    const avgMinDistance =
+      minDistances.length > 0
+        ? minDistances.reduce((sum, value) => sum + value, 0) / minDistances.length
+        : 0;
+    const centerDeviation = vectorNorm(meanVector);
+
+    const enriched = selected.map((item) => {
+      const topAxes = axisIds
+        .map((axisId, index) => {
+          const axis = axisMap[axisId];
+          const value = item.vector[index];
+          return {
+            axisName: axis?.name_ja || axisId,
+            side: value >= 0 ? axis?.positive || "+" : axis?.negative || "-",
+            abs: Math.abs(value),
+          };
+        })
+        .sort((a, b) => b.abs - a.abs)
+        .slice(0, 2)
+        .map((entry) => `${entry.axisName}:${entry.side}`)
+        .join(" / ");
+
+      return {
+        trait_id: item.trait.trait_id,
+        name: item.trait.name_ja || item.trait.name_en || item.trait.trait_id,
+        reason: topAxes,
+      };
+    });
+
+    return {
+      count: selected.length,
+      modeLabel: mode.label,
+      traits: enriched,
+      avgMinDistance,
+      centerDeviation,
+      balanceScore: mode.alpha * avgMinDistance - mode.beta * centerDeviation,
+    };
+  }, [selectedAxes, traits, compositionSize, compositionMode]);
+  const recommendedTraitIds = useMemo(
+    () => new Set((compositionPlan?.traits || []).map((item) => item.trait_id)),
+    [compositionPlan],
+  );
+  const visibleScatter = useMemo(
+    () => scatter.filter((point) => recommendedTraitIds.has(point.trait_id)),
+    [scatter, recommendedTraitIds],
   );
 
   function toggleAxis(axisId, checked) {
@@ -360,7 +513,7 @@ export default function App() {
 
   return (
     <div className="page">
-      <h1>Trait Map MVP</h1>
+      <h1>Trait Space & Map</h1>
 
       <div className="workspaceLayout">
         <aside className="leftPane">
@@ -452,12 +605,85 @@ export default function App() {
             >
               性格比較
             </button>
+            <button
+              type="button"
+              className={`tabButton ${activeView === "guide" ? "active" : ""}`}
+              onClick={() => setActiveView("guide")}
+            >
+              使い方
+            </button>
           </div>
 
           <div className="rightPaneBody">
 
       {activeView === "map" && (
         <>
+
+      <section className="card">
+        <h2>編成提案（バランス選定）</h2>
+        <div className="controls">
+          <label>
+            目標人数
+            <input
+              type="number"
+              min="2"
+              max={traits.length || 2}
+              value={compositionSize}
+              onChange={(e) => setCompositionSize(Number(e.target.value))}
+            />
+          </label>
+          <label>
+            方針
+            <select value={compositionMode} onChange={(e) => setCompositionMode(e.target.value)}>
+              {Object.entries(COMPOSITION_MODES).map(([id, mode]) => (
+                <option key={id} value={id}>
+                  {mode.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          {compositionPlan && (
+            <label>
+              提案結果
+              <div className="plainValue">{compositionPlan.count}件 / {compositionPlan.modeLabel}</div>
+            </label>
+          )}
+        </div>
+
+        {compositionPlan ? (
+          <>
+            <div className="recommendStats">
+              <div>重複回避スコア: {compositionPlan.avgMinDistance.toFixed(3)}</div>
+              <div>中心偏差: {compositionPlan.centerDeviation.toFixed(3)}</div>
+              <div>総合: {compositionPlan.balanceScore.toFixed(3)}</div>
+            </div>
+            <table className="recommendTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>候補</th>
+                  <th>採用理由（強い軸）</th>
+                </tr>
+              </thead>
+              <tbody>
+                {compositionPlan.traits.map((item, index) => (
+                  <tr key={item.trait_id}>
+                    <td>{index + 1}</td>
+                    <td>
+                      <strong>{item.name}</strong>
+                      <div className="cellSub">{item.trait_id}</div>
+                    </td>
+                    <td>{item.reason || "-"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            
+          </>
+        ) : (
+          <p className="helperText">提案に必要なデータが不足しています。</p>
+        )}
+      </section>
 
       <section className="card">
         <h2>散布図</h2>
@@ -484,15 +710,8 @@ export default function App() {
             </select>
           </label>
           <label>
-            表示数（{visibleScatter.length} / {scatter.length}）
-            <input
-              type="range"
-              min="0"
-              max="120"
-              value={labelDist}
-              onChange={(e) => setLabelDist(Number(e.target.value))}
-              style={{ width: "140px" }}
-            />
+            表示対象
+            <div className="plainValue">編成提案 {visibleScatter.length} / 全体 {scatter.length}</div>
           </label>
         </div>
 
@@ -511,11 +730,12 @@ export default function App() {
             const cx = mapToCanvas(point.x, 40, 600);
             const cy = mapToCanvas(-point.y, 20, 380);
             const label = traitLabelMap[point.trait_id] || point.name_ja || point.name_en || point.trait_id;
+            const isRecommended = recommendedTraitIds.has(point.trait_id);
             return (
               <g key={point.trait_id}>
-                <circle cx={cx} cy={cy} r="6" fill="#1d4ed8" />
+                <circle cx={cx} cy={cy} r={isRecommended ? "7" : "6"} fill={isRecommended ? "#ea580c" : "#1d4ed8"} />
                 <text x={cx + 8} y={cy - 8} fontSize="12" fill="#111827">
-                  {label}
+                  {isRecommended ? ` ${label}` : label}
                 </text>
               </g>
             );
@@ -534,7 +754,7 @@ export default function App() {
               性格検索
               <input
                 type="text"
-                placeholder="例: 勇敢 / brave / brave"
+                placeholder="例: 勇敢 / brave"
                 value={traitSearch}
                 onChange={(e) => setTraitSearch(e.target.value)}
               />
@@ -550,7 +770,7 @@ export default function App() {
               <thead>
                 <tr>
                   <th>性格</th>
-                  <th>言い換え（自動）</th>
+                  <th>言い換え</th>
                   {selectedAxes.map((axis) => (
                     <th key={axis.id}>{axis.name_ja}</th>
                   ))}
@@ -583,86 +803,116 @@ export default function App() {
       )}
 
       {activeView === "compare" && (
-        <section className="card">
-          <h2>性格比較</h2>
-          <div className="controls">
-            <label>
-              性格A
-              <select value={traitA} onChange={(e) => setTraitA(e.target.value)}>
-                {traits.map((trait) => (
-                  <option key={trait.trait_id} value={trait.trait_id}>
-                    {trait.name_ja || trait.name_en}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              性格B
-              <select value={traitB} onChange={(e) => setTraitB(e.target.value)}>
-                {traits.map((trait) => (
-                  <option key={trait.trait_id} value={trait.trait_id}>
-                    {trait.name_ja || trait.name_en}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          {compareRowsInSelectedAxes.length > 0 && (
-            <div className="radarWrapper">
-              <ResponsiveContainer width="100%" height={360}>
-                <RadarChart
-                  data={compareRowsInSelectedAxes.map((row) => ({
-                    subject: axisLabelMap[row.axis] || row.axis,
-                    A: Math.round((row.a + 1) * 50),
-                    B: Math.round((row.b + 1) * 50),
-                  }))}
-                >
-                  <PolarGrid />
-                  <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12 }} />
-                  <Radar
-                    name={traitLabelMap[traitA] || traitA}
-                    dataKey="A"
-                    stroke="#4f8ef7"
-                    fill="#4f8ef7"
-                    fillOpacity={0.25}
-                  />
-                  <Radar
-                    name={traitLabelMap[traitB] || traitB}
-                    dataKey="B"
-                    stroke="#f97316"
-                    fill="#f97316"
-                    fillOpacity={0.25}
-                  />
-                  <Legend />
-                  <Tooltip formatter={(v) => `${v} / 100`} />
-                </RadarChart>
-              </ResponsiveContainer>
+          <section className="card compareMain">
+            <h2>性格比較</h2>
+            <div className="controls">
+              <label>
+                性格A
+                <select value={traitA} onChange={(e) => setTraitA(e.target.value)}>
+                  {traits.map((trait) => (
+                    <option key={trait.trait_id} value={trait.trait_id}>
+                      {trait.name_ja || trait.name_en}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                性格B
+                <select value={traitB} onChange={(e) => setTraitB(e.target.value)}>
+                  {traits.map((trait) => (
+                    <option key={trait.trait_id} value={trait.trait_id}>
+                      {trait.name_ja || trait.name_en}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
-          )}
-          <table>
-            <thead>
-              <tr>
-                <th>軸</th>
-                <th>A</th>
-                <th>B</th>
-                <th>差分</th>
-              </tr>
-            </thead>
-            <tbody>
-              {compareRowsInSelectedAxes.map((row) => (
-                <tr key={row.axis}>
-                  <td>{axisLabelMap[row.axis] || row.axis}</td>
-                  <td>{row.a.toFixed(2)}</td>
-                  <td>{row.b.toFixed(2)}</td>
-                  <td>{row.diff.toFixed(2)}</td>
+            {compareRowsInSelectedAxes.length > 0 && (
+              <div className="radarWrapper">
+                <ResponsiveContainer width="100%" height={360}>
+                  <RadarChart
+                    data={compareRowsInSelectedAxes.map((row) => ({
+                      subject: axisLabelMap[row.axis] || row.axis,
+                      A: Math.round((row.a + 1) * 50),
+                      B: Math.round((row.b + 1) * 50),
+                    }))}
+                  >
+                    <PolarGrid />
+                    <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12 }} />
+                    <Radar
+                      name={traitLabelMap[traitA] || traitA}
+                      dataKey="A"
+                      stroke="#4f8ef7"
+                      fill="#4f8ef7"
+                      fillOpacity={0.25}
+                    />
+                    <Radar
+                      name={traitLabelMap[traitB] || traitB}
+                      dataKey="B"
+                      stroke="#f97316"
+                      fill="#f97316"
+                      fillOpacity={0.25}
+                    />
+                    <Legend />
+                    <Tooltip formatter={(v) => `${v} / 100`} />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+            <table>
+              <thead>
+                <tr>
+                  <th>軸</th>
+                  <th>A</th>
+                  <th>B</th>
+                  <th>差分</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {compareRowsInSelectedAxes.map((row) => (
+                  <tr key={row.axis}>
+                    <td>{axisLabelMap[row.axis] || row.axis}</td>
+                    <td>{row.a.toFixed(2)}</td>
+                    <td>{row.b.toFixed(2)}</td>
+                    <td>{row.diff.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+      )}
+
+      {activeView === "guide" && (
+        <section className="card">
+          <h2>使い方ガイド</h2>
+          <div className="guideBlock">
+            <h4>1. 各タブの使い方</h4>
+            <p><strong>Trait Map</strong>: 編成提案と散布図で全体バランスを確認。</p>
+            <p><strong>Trait Space</strong>: 選択中10軸の全性格値と自動言い換えを一覧確認。</p>
+            <p><strong>性格比較</strong>: 2性格をレーダーと差分表で比較して、採用/不採用判断に使う。</p>
+          </div>
+          <div className="guideBlock">
+            <h4>2. プリセット</h4>
+            <p>プリセットはジャンル別の推奨10軸セットです。まず近いプリセットを選び、必要に応じて手動で軸を調整します。</p>
+          </div>
+          <div className="guideBlock">
+            <h4>3. 方針（編成提案）</h4>
+            <p><strong>中庸重視</strong>: バランス優先で偏りを抑える。</p>
+            <p><strong>多様性重視</strong>: 似た性格を避けて幅広く採用する。</p>
+            <p><strong>対立強め</strong>: 差の大きい性格も入れて、緊張感やドラマ性を高める。</p>
+          </div>
+          <div className="guideBlock">
+            <h4>4. 指標の意味</h4>
+            <p><strong>重複回避スコア</strong>: 候補同士がどれだけ離れているか。高いほど役割が被りにくい。</p>
+            <p><strong>中心偏差</strong>: 採用集合の平均が中心(0)からどれだけズレるか。低いほど極端な偏りが少ない。</p>
+            <p><strong>総合</strong>: 方針に応じて重複回避と中心偏差を合成した値。</p>
+          </div>
+          
         </section>
       )}
 
           </div>
+
         </div>
       </div>
     </div>
