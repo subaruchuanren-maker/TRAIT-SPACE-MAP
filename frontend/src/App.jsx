@@ -23,6 +23,8 @@ export default function App() {
   const [profileId, setProfileId] = useState("soccer_support");
   const [recommendRows, setRecommendRows] = useState([]);
 
+  const [labelDist, setLabelDist] = useState(72);
+
   useEffect(() => {
     async function loadInitial() {
       const [axesRes, traitsRes, profilesRes] = await Promise.all([
@@ -89,6 +91,29 @@ export default function App() {
     () => Object.fromEntries(traits.map((trait) => [trait.trait_id, trait.name_ja || trait.name_en])),
     [traits],
   );
+  const xAxisInfo = useMemo(() => axes.find((a) => a.id === xAxis) || {}, [axes, xAxis]);
+  const yAxisInfo = useMemo(() => axes.find((a) => a.id === yAxis) || {}, [axes, yAxis]);
+
+  // 近すぎるラベルを間引く（ドットは全件表示、ラベルのみフィルタ）
+  const visibleLabelIds = useMemo(() => {
+    const minDistance = 120 - labelDist;
+    const placed = [];
+    const visible = new Set();
+    for (const point of scatter) {
+      const cx = ((point.x + 1) / 2) * 560 + 40;
+      const cy = ((-point.y + 1) / 2) * 360 + 20;
+      const tooClose = placed.some((p) => Math.hypot(p.cx - cx, p.cy - cy) < minDistance);
+      if (!tooClose) {
+        placed.push({ cx, cy });
+        visible.add(point.trait_id);
+      }
+    }
+    return visible;
+  }, [scatter, labelDist]);
+  const visibleScatter = useMemo(
+    () => scatter.filter((point) => visibleLabelIds.has(point.trait_id)),
+    [scatter, visibleLabelIds],
+  );
   const profileLabelMap = useMemo(
     () => ({
       soccer_striker: "サッカー: ストライカー",
@@ -100,7 +125,7 @@ export default function App() {
 
   return (
     <div className="page">
-      <h1>Trait Map MVP（日本語表示）</h1>
+      <h1>Trait Map MVP</h1>
 
       <section className="card">
         <h2>散布図</h2>
@@ -125,20 +150,39 @@ export default function App() {
               ))}
             </select>
           </label>
+          <label>
+            表示数（{visibleScatter.length} / {scatter.length}）
+            <input
+              type="range"
+              min="0"
+              max="120"
+              value={labelDist}
+              onChange={(e) => setLabelDist(Number(e.target.value))}
+              style={{ width: "140px" }}
+            />
+          </label>
         </div>
 
-        <svg viewBox="0 0 640 420" className="plot">
+        <svg viewBox="0 -20 700 460" className="plot">
           <rect x="40" y="20" width="560" height="360" fill="#f9fafb" stroke="#d0d7de" />
           <line x1="320" y1="20" x2="320" y2="380" stroke="#9ca3af" strokeDasharray="4 4" />
           <line x1="40" y1="200" x2="600" y2="200" stroke="#9ca3af" strokeDasharray="4 4" />
-          {scatter.map((point) => {
+
+          {/* 手書きイメージに合わせて、上下左右の外側に軸方向ラベルを置く */}
+          <text x="8" y="205" fontSize="12" fill="#374151">{xAxisInfo.negative}</text>
+          <text x="642" y="205" fontSize="12" fill="#374151" textAnchor="end">{xAxisInfo.positive}</text>
+          <text x="320" y="14" fontSize="12" fill="#374151" textAnchor="middle">{yAxisInfo.positive}</text>
+          <text x="320" y="400" fontSize="12" fill="#374151" textAnchor="middle">{yAxisInfo.negative}</text>
+
+          {visibleScatter.map((point) => {
             const cx = mapToCanvas(point.x, 40, 600);
             const cy = mapToCanvas(-point.y, 20, 380);
+            const label = traitLabelMap[point.trait_id] || point.name_ja || point.name_en || point.trait_id;
             return (
               <g key={point.trait_id}>
                 <circle cx={cx} cy={cy} r="6" fill="#1d4ed8" />
                 <text x={cx + 8} y={cy - 8} fontSize="12" fill="#111827">
-                  {traitLabelMap[point.trait_id] || point.name_ja || point.name_en || point.trait_id}
+                  {label}
                 </text>
               </g>
             );
