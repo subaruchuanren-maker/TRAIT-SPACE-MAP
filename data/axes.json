@@ -1,6 +1,6 @@
 {
-  "vector_version": "0.1",
-  "dimension_count": 10,
+  "vector_version": "0.2",
+  "dimension_count": 18,
   "value_range": [-1.0, 1.0],
   "axes": [
     {
@@ -101,7 +101,87 @@
       "negative": "保守的",
       "positive": "探索的",
       "description_ja": "未知要素を試す傾向と、既知手法を維持する傾向の差を表す軸。",
-      "use_case_ja": "新戦略採用、未知領域探索、安定行動とのトレードオフ調整。"
+      "use_case_ja": "新戦略採用、未知領域探索、安定行動とのトレードオフ調整。探険心・開放性・冒険心・知的好奇心を包含。"
+    },
+    {
+      "id": "morality",
+      "index": 10,
+      "name_ja": "道徳観",
+      "name_en": "Morality",
+      "negative": "非倫理的",
+      "positive": "倫理重視",
+      "description_ja": "行動選択において倫理・道義をどれだけ優先するかを表す軸。",
+      "use_case_ja": "善悪判断、犠牲の許容度、クライム/ホラーでの利己行動 vs 倫理維持。正義感・人道性・道徳観を包含。"
+    },
+    {
+      "id": "empathy",
+      "index": 11,
+      "name_ja": "共感力",
+      "name_en": "Empathy",
+      "negative": "無共感",
+      "positive": "高共感",
+      "description_ja": "他者の感情・立場を読み取り、自分の行動に反映させる度合い。",
+      "use_case_ja": "ドラマでの感情イベント、NPCへの反応、支援行動の動機。感情反応（自分の感情）とは直交。"
+    },
+    {
+      "id": "optimism",
+      "index": 12,
+      "name_ja": "楽観性",
+      "name_en": "Optimism",
+      "negative": "悲観的",
+      "positive": "楽観的",
+      "description_ja": "物事の結果をポジティブに見込むか、ネガティブに見込むかの傾向。",
+      "use_case_ja": "挫折後の立ち直り速度、クリティカル補正、長期戦略の継続意欲。感情反応（強度）とは直交。"
+    },
+    {
+      "id": "selfishness",
+      "index": 13,
+      "name_ja": "利己性",
+      "name_en": "Selfishness",
+      "negative": "利他的",
+      "positive": "利己的",
+      "description_ja": "意思決定における自己利益優先の度合いを表す軸。",
+      "use_case_ja": "資源配分、裏切り判断、サバイバルでの自分優先行動。協調性（行動スタイル）と区別し、動機軸として機能。"
+    },
+    {
+      "id": "cunning",
+      "index": 14,
+      "name_ja": "狡猾さ",
+      "name_en": "Cunning",
+      "negative": "正直",
+      "positive": "策略的",
+      "description_ja": "目的達成のために迂回・策略・欺瞞をどれだけ使うかを示す軸。",
+      "use_case_ja": "SLGでの奇策・陽動、クライムでの策略、交渉での罠設置。"
+    },
+    {
+      "id": "honor",
+      "index": 15,
+      "name_ja": "名誉心",
+      "name_en": "Honor",
+      "negative": "無関心",
+      "positive": "名誉重視",
+      "description_ja": "他者からの評価・称賛・プライドをどれだけ行動の動機にするかを示す軸。",
+      "use_case_ja": "功名心、騎士道、自己顕示欲、ファン効果。主導性（引っ張るか）と区別し、承認動機軸として機能。"
+    },
+    {
+      "id": "burst",
+      "index": 16,
+      "name_ja": "爆発力",
+      "name_en": "Burst",
+      "negative": "安定型",
+      "positive": "瞬発型",
+      "description_ja": "平均的な出力より、瞬間最大パフォーマンスへの傾きを表す軸。",
+      "use_case_ja": "スポーツの決め場面、勝負強さ、接戦時の補正。持続性（粘り強さ）と直交する瞬間火力軸。"
+    },
+    {
+      "id": "deception",
+      "index": 17,
+      "name_ja": "虚言性",
+      "name_en": "Deception",
+      "negative": "正直",
+      "positive": "欺瞞的",
+      "description_ja": "嘘・偽装・情報操作を手段として使う頻度を示す軸。",
+      "use_case_ja": "クライム/ノワールでの情報戦、外交での欺瞞、裏切りの予兆。信頼度（信じる側）の対軸として機能。"
     }
   ]
 }
