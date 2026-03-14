@@ -1,0 +1,87 @@
+{
+  "vector_version": "0.1",
+  "dimension_count": 10,
+  "value_range": [-1.0, 1.0],
+  "axes": [
+    {
+      "id": "risk_tolerance",
+      "index": 0,
+      "name_ja": "リスク許容",
+      "name_en": "RiskTolerance",
+      "negative": "慎重",
+      "positive": "挑戦的"
+    },
+    {
+      "id": "cooperation",
+      "index": 1,
+      "name_ja": "協調志向",
+      "name_en": "Cooperation",
+      "negative": "単独志向",
+      "positive": "協力志向"
+    },
+    {
+      "id": "aggression",
+      "index": 2,
+      "name_ja": "攻撃性",
+      "name_en": "Aggression",
+      "negative": "穏健",
+      "positive": "攻撃的"
+    },
+    {
+      "id": "persistence",
+      "index": 3,
+      "name_ja": "持続性",
+      "name_en": "Persistence",
+      "negative": "柔軟",
+      "positive": "固執"
+    },
+    {
+      "id": "adaptability",
+      "index": 4,
+      "name_ja": "適応性",
+      "name_en": "Adaptability",
+      "negative": "変化に弱い",
+      "positive": "柔軟"
+    },
+    {
+      "id": "self_reliance",
+      "index": 5,
+      "name_ja": "自立性",
+      "name_en": "SelfReliance",
+      "negative": "依存的",
+      "positive": "独立的"
+    },
+    {
+      "id": "trust",
+      "index": 6,
+      "name_ja": "信頼",
+      "name_en": "Trust",
+      "negative": "疑い深い",
+      "positive": "信頼的"
+    },
+    {
+      "id": "control",
+      "index": 7,
+      "name_ja": "主導性",
+      "name_en": "ControlSeeking",
+      "negative": "追従",
+      "positive": "支配"
+    },
+    {
+      "id": "emotion",
+      "index": 8,
+      "name_ja": "感情反応",
+      "name_en": "EmotionalReactivity",
+      "negative": "冷静",
+      "positive": "感情的"
+    },
+    {
+      "id": "exploration",
+      "index": 9,
+      "name_ja": "探求",
+      "name_en": "Exploration",
+      "negative": "保守的",
+      "positive": "探索的"
+    }
+  ]
+}
