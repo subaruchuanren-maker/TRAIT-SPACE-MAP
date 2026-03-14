@@ -1,4 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
+import {
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 
 const API_BASE = "http://localhost:8000";
 
@@ -272,6 +281,9 @@ export default function App() {
             <div className="sectionHeader">
               <h2>表示軸セット（最大10）</h2>
               <div className="sectionHeaderRight">
+                <button type="button" className="minorButton" onClick={() => setAxisEditorOpen((open) => !open)}>
+                  {axisEditorOpen ? "軸編集を閉じる" : "軸編集を開く"}
+                </button>
                 <label className="presetPicker">
                   プリセット
                   <select
@@ -293,9 +305,6 @@ export default function App() {
                     ))}
                   </select>
                 </label>
-                <button type="button" className="minorButton" onClick={() => setAxisEditorOpen((open) => !open)}>
-                  {axisEditorOpen ? "軸編集を閉じる" : "軸編集を開く"}
-                </button>
               </div>
             </div>
             <div className="axisMeta">選択中: {selectedAxisIds.length} / 10</div>
@@ -511,6 +520,38 @@ export default function App() {
               </select>
             </label>
           </div>
+          {compareRowsInSelectedAxes.length > 0 && (
+            <div className="radarWrapper">
+              <ResponsiveContainer width="100%" height={360}>
+                <RadarChart
+                  data={compareRowsInSelectedAxes.map((row) => ({
+                    subject: axisLabelMap[row.axis] || row.axis,
+                    A: Math.round((row.a + 1) * 50),
+                    B: Math.round((row.b + 1) * 50),
+                  }))}
+                >
+                  <PolarGrid />
+                  <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12 }} />
+                  <Radar
+                    name={traitLabelMap[traitA] || traitA}
+                    dataKey="A"
+                    stroke="#4f8ef7"
+                    fill="#4f8ef7"
+                    fillOpacity={0.25}
+                  />
+                  <Radar
+                    name={traitLabelMap[traitB] || traitB}
+                    dataKey="B"
+                    stroke="#f97316"
+                    fill="#f97316"
+                    fillOpacity={0.25}
+                  />
+                  <Legend />
+                  <Tooltip formatter={(v) => `${v} / 100`} />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
           <table>
             <thead>
               <tr>

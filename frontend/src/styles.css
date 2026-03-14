@@ -13,7 +13,7 @@ body {
 }
 
 .page {
-  max-width: 1080px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 24px;
 }
@@ -60,6 +60,7 @@ h1 {
   display: flex;
   gap: 8px;
   align-items: flex-end;
+  flex-direction: column;
 }
 
 .presetPicker {
@@ -191,6 +192,7 @@ input[type="text"] {
   padding: 6px 10px;
   font-size: 13px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .minorButton:hover {
@@ -213,6 +215,13 @@ td {
   border: 1px solid #e5e7eb;
   padding: 8px;
   text-align: left;
+}
+
+.radarWrapper {
+  margin-bottom: 24px;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 12px 4px;
 }
 
 .spaceTableWrap {
