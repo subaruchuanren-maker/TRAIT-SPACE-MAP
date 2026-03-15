@@ -160,7 +160,7 @@ def scatter_points(x_axis: str, y_axis: str) -> dict[str, Any]:
     }
 
 
-app = FastAPI(title="Trait Map MVP API", version="0.1.0")
+app = FastAPI(title="Trait Space & MapVP API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,

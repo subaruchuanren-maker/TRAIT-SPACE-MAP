@@ -329,9 +329,28 @@ export default function App() {
       const ja = (trait.name_ja || "").toLowerCase();
       const en = (trait.name_en || "").toLowerCase();
       const id = (trait.trait_id || "").toLowerCase();
-      return ja.includes(query) || en.includes(query) || id.includes(query);
+      const manualAliases =
+        traitAliases[trait.name_ja] ||
+        traitAliases[trait.trait_id] ||
+        traitAliases[trait.name_en] ||
+        [];
+      const aliasText = Array.isArray(manualAliases)
+        ? manualAliases
+            .filter((item) => typeof item === "string" && item.trim())
+            .join(" ")
+            .toLowerCase()
+        : "";
+      const overrideText = (TRAIT_PARAPHRASE_OVERRIDES[trait.trait_id] || "").toLowerCase();
+
+      return (
+        ja.includes(query) ||
+        en.includes(query) ||
+        id.includes(query) ||
+        aliasText.includes(query) ||
+        overrideText.includes(query)
+      );
     });
-  }, [traits, traitSearch]);
+  }, [traits, traitSearch, traitAliases]);
   const traitParaphraseMap = useMemo(
     () =>
       Object.fromEntries(
@@ -754,7 +773,7 @@ export default function App() {
               性格検索
               <input
                 type="text"
-                placeholder="例: 勇敢 / brave"
+                placeholder="例: 勇敢 / brave / 人懐っこい"
                 value={traitSearch}
                 onChange={(e) => setTraitSearch(e.target.value)}
               />
@@ -770,7 +789,7 @@ export default function App() {
               <thead>
                 <tr>
                   <th>性格</th>
-                  <th>言い換え</th>
+                  <th>言い換え、類義語</th>
                   {selectedAxes.map((axis) => (
                     <th key={axis.id}>{axis.name_ja}</th>
                   ))}

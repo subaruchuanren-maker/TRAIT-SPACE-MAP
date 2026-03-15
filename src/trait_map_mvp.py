@@ -90,7 +90,7 @@ def scatter_points(x_axis: str, y_axis: str) -> List[Tuple[str, float, float]]:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Trait Map MVP data demo")
+    parser = argparse.ArgumentParser(description="Trait Space & MapVP data demo")
     sub = parser.add_subparsers(dest="command", required=True)
 
     compare_parser = sub.add_parser("compare", help="Compare two traits axis-by-axis")

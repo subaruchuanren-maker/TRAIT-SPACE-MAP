@@ -1,4 +1,4 @@
-# Trait Map MVP (React + FastAPI)
+# Trait Space & Map (React + FastAPI)
 
 ゲームキャラクターの性格をベクトルとして管理し、
 可視化・比較・編成提案まで行うツールです。
